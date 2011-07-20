@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+            "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+<head>
+	<title>Enlighten History Demo</title>
+	<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+	<script src="http://enlighten-api-javascript.googlecode.com/git/flot/jquery.flot.min.js"></script>
+	<script src="http://enlighten-api-javascript.googlecode.com/git/enlighten-api.js"></script>
+	<script src="http://enlighten-api-javascript.googlecode.com/git/enlighten-graph.js"></script>
+</head>
+
+<body>
+
+	<h1>Enlighten History Example</h1>
+	Powered by<br><a href="http://enphase.com"><img src="http://enphase.com/wp-uploads/enphase.com/2011/06/EnphaseAPIMark.png"></a><br>
+	<p>API Key: <input id="apikey" type="text"></p>
+	<p>Show Date: <input id="statsdate" type="text"></p>
+	<input class="plotButton" type="button" value="Plot"><br>
+	<p style="font-size:smaller">
+	Notes:
+	<ul style="font-size:smaller">
+	<li>Your API key is available on your Enlighten account page</li>
+	<li>It's saved in a cookie on your computer for next time</li>
+	<li>I do not see or save your API key, but you'll need to trust me or read the javascript</li>
+	<li>You can hover over the graph for a tooltip showing exact values</li>
+	</ul><p>
+	<div id="graph" style="width:600px;height:300px;"></div>
+
+<script type="text/javascript">
+
+$(function() {
+	$( "#statsdate" ).datepicker({ maxDate: '+0d' });
+
+function createCookie(name,value,days) {
+	if (days) {
+		var date = new Date();
+		date.setTime(date.getTime()+(days*24*60*60*1000));
+		var expires = "; expires="+date.toGMTString();
+	}
+	else var expires = "";
+	document.cookie = name+"="+value+expires+"; path=/";
+}
+
+function readCookie(name) {
+	var nameEQ = name + "=";
+	var ca = document.cookie.split(';');
+	for(var i=0;i < ca.length;i++) {
+		var c = ca[i];
+		while (c.charAt(0)==' ') c = c.substring(1,c.length);
+		if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+	}
+	return null;
+}
+
+	var apiKey = readCookie('apiKey')
+	if (apiKey) {
+		document.getElementById('apikey').value = apiKey;
+	}
+
+// Callback for "plot" button; this in turn calls back to plotGraph in enlighten-graph.js
+function plotSystemGraph(data)
+{
+	// This api key was good, save it in a cookie
+	createCookie('apiKey', apiKey, 365);
+
+	// Just pick first system for now
+	var systemID = data.systems[0].system_id;
+
+	// And send the request for the stats
+	var apiRequest = new enphaseApiRequest();
+	apiRequest.apiKey = document.getElementById('apikey').value;
+	apiRequest.systemID= systemID;
+
+	var start = document.getElementById('statsdate').value;
+	var date = $("#statsdate").datepicker("getDate")
+
+	if (date) {
+		var isodate = date.toISO8601String();
+		apiRequest.getStats(plotGraph, isodate);
+	} else {
+		apiRequest.getStats(plotGraph);
+	}
+}
+
+$("input.plotButton").click(function () {
+	var apiKey = document.getElementById('apikey').value;
+
+	if (apiKey) {
+		var apiRequest = new enphaseApiRequest();
+		apiRequest.apiKey = apiKey;
+		apiRequest.getSystems(plotSystemGraph);
+	}
+});
+
+});
+
+</script>
+</body>
+</html>
