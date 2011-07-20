@@ -64,6 +64,7 @@ function readCookie(name) {
 function plotSystemGraph(data)
 {
 	// This api key was good, save it in a cookie
+	var apiKey = document.getElementById('apikey').value;
 	createCookie('apiKey', apiKey, 365);
 
 	// Just pick first system for now
