@@ -133,13 +133,13 @@ function sumStatsEnergy(stats)
 // Convert singular units to Kilo or Giga or Mega ...
 function toKGM(value) {
 
-    if (value > 1000000000) {
+    if (value >= 1000000000) {
         num = value / 1000000000;
         return num.toPrecision(3) + ' G';
-    } else if (value > 1000000) {
+    } else if (value >= 1000000) {
         num = value / 1000000;
         return num.toPrecision(3) + ' M';
-    } else if (value > 1000) {
+    } else if (value >= 1000) {
         num = value / 1000;
         return num.toPrecision(3) + ' K';
     } else {
